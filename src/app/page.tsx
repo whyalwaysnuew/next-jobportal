@@ -1,10 +1,19 @@
-import {Button} from '@/components/ui/button'
-import Image from 'next/image'
+import FeaturedJobs from "@/components/organisms/FeaturedJobs";
+import BannerSignUp from "@/components/organisms/BannerSignUp";
+import Category from "@/components/organisms/Category";
+import Clients from "@/components/organisms/Clients";
+import Hero from "@/components/organisms/Hero";
+import LatestJobs from "@/components/organisms/LatestJobs";
 
 export default function Home() {
   return (
-    <div>
-      <Button variant='destructive'>Test</Button>
+    <div className="px-32 mb-10">
+      <Hero />
+      <Clients />
+      <Category />
+      <BannerSignUp />
+      <FeaturedJobs />
+      <LatestJobs />
     </div>
-  )
+  );
 }
