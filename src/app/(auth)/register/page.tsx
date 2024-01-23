@@ -1,26 +1,55 @@
-"use client"
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { formRegisterSchema } from '@/lib/form-schema';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
-import React, { FC } from 'react'
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import {Button} from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {useToast} from "@/components/ui/use-toast";
+import {formRegisterSchema} from "@/lib/form-schema";
+import {zodResolver} from "@hookform/resolvers/zod";
+import Link from "next/link";
+import {useRouter} from "next/navigation";
+import React, {FC} from "react";
+import {useForm} from "react-hook-form";
+import {z} from "zod";
 
-interface RegisterPageProps {
-  
-}
+interface RegisterPageProps {}
 
-const RegisterPage: FC<RegisterPageProps> = ({  }) => {
+const RegisterPage: FC<RegisterPageProps> = ({}) => {
   const form = useForm<z.infer<typeof formRegisterSchema>>({
     resolver: zodResolver(formRegisterSchema),
   });
 
-  const onSubmit = (val: z.infer<typeof formRegisterSchema>) => {
-    console.log(val);
+  const router = useRouter();
+
+  const {toast} = useToast();
+
+  const onSubmit = async (val: z.infer<typeof formRegisterSchema>) => {
+    try {
+      await fetch("/api/user", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(val),
+      });
+
+      toast({
+        title: "Success",
+        description: "Register Success",
+      });
+
+      router.push("/login");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Please try again",
+      });
+    }
   };
 
   return (
@@ -85,6 +114,6 @@ const RegisterPage: FC<RegisterPageProps> = ({  }) => {
       </div>
     </div>
   );
-}
+};
 
 export default RegisterPage;

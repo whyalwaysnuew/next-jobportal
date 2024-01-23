@@ -4,6 +4,7 @@ import "../globals.css";
 import Image from "next/image";
 import Navbar from "@/components/layouts/Navbar";
 import Footer from "@/components/layouts/Footer";
+import { Toaster } from "@/components/ui/toaster";
 
 const epilogue = Epilogue({subsets: ["latin"]});
 
@@ -22,6 +23,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           {children}
         </main>
         <Footer />
+        <Toaster />
       </body>
     </html>
   );
