@@ -22,3 +22,18 @@ export const formApplySchema = z.object({
   portfolio: z.string(),
   coverLetter: z.string(),
 });
+
+export const formLoginSchema = z.object({
+  email: z
+    .string({required_error: "Email is required"})
+    .email({message: "Email is not valid"}),
+  password: z.string({required_error: "Password is required"}),
+});
+
+export const formRegisterSchema = z.object({
+  email: z
+    .string({required_error: "Email is required"})
+    .email({message: "Email is not valid"}),
+  password: z.string({required_error: "Password is required"}),
+  name: z.string({required_error: 'Name is required'}).min(3, {message: 'Name should be at least 3 characters'})
+});
