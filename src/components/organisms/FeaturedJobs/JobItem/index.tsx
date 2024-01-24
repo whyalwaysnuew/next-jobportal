@@ -1,16 +1,30 @@
-import { Badge } from '@/components/ui/badge';
-import { JobType, categoryJobType } from '@/types';
-import Image from 'next/image';
-import React, { FC } from 'react'
+import {Badge} from "@/components/ui/badge";
+import {JobType, categoryJobType} from "@/types";
+import Image from "next/image";
+import React, {FC} from "react";
 
-interface JobItemProps extends JobType {
-}
+interface JobItemProps extends JobType {}
 
-const JobItem: FC<JobItemProps> = ({ categories, desc, image, jobType, location, name, type }) => {
+const JobItem: FC<JobItemProps> = ({
+  category,
+  desc,
+  image,
+  jobType,
+  location,
+  name,
+  type,
+  skills,
+}) => {
   return (
     <div className="border border-border p-6 cursor-pointer">
       <div className="flex flex-row justify-between items-start">
-        <Image src={image} alt={image} width={48} height={48} style={{objectFit: "cover"}}/>
+        <Image
+          src={image}
+          alt={image}
+          width={48}
+          height={48}
+          style={{objectFit: "cover"}}
+        />
         <span className="px-4 py-1 border text-xs font-semibold text-primary border-primary">
           {jobType}
         </span>
@@ -20,14 +34,24 @@ const JobItem: FC<JobItemProps> = ({ categories, desc, image, jobType, location,
         <div className="text-muted-foreground mb-3">
           {type} . {location}
         </div>
-        <div className="text-muted-foreground h-12 line-clamp-2 text-ellipsis" dangerouslySetInnerHTML={{__html: desc}}>
-        </div>
+        <div
+          className="text-muted-foreground h-12 line-clamp-2 text-ellipsis"
+          dangerouslySetInnerHTML={{__html: desc}}
+        ></div>
       </div>
       <div className="space-x-2">
-        <Badge>{categories.name}</Badge>
+        {skills.map((item: string, i: number) => (
+          <Badge
+            key={item + i}
+            variant="outline"
+            className="rounded border-primary bg-primary/5 text-primary"
+          >
+            {item}
+          </Badge>
+        ))}
       </div>
     </div>
   );
-}
+};
 
 export default JobItem;

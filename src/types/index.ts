@@ -12,9 +12,10 @@ export type JobType = {
   type: string;
   location: string;
   desc: string;
-  categories: categoryJobType;
+  category: categoryJobType;
   needs: number;
   applicants: number;
+  skills: string[]
 };
 
 export type optionType = {
