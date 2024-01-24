@@ -1,8 +1,8 @@
 import {type ClassValue, clsx} from "clsx";
 import {twMerge} from "tailwind-merge";
 import bcrypt from "bcryptjs";
-import {JobType, categoryJobType} from "@/types";
-import { supabasePublicUrl } from './supabase';
+import {JobType, categoryJobType, optionType} from "@/types";
+import {supabasePublicUrl} from "./supabase";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -50,36 +50,57 @@ export const parsingCategories = (
   return [];
 };
 
-export const parsingJobs = async (data: any, isLoading: boolean, error: any) => {
+export const parsingJobs = async (
+  data: any,
+  isLoading: boolean,
+  error: any
+) => {
   if (!isLoading && !error && data) {
     return await Promise.all(
-      data.map(async(item: any) => {
-        let imageName = item.Company?.Companyoverview[0]?.image
+      data.map(async (item: any) => {
+        let imageName = item.Company?.Companyoverview[0]?.image;
         let imageUrl;
 
-        if(imageName){
-          imageUrl = await supabasePublicUrl(imageName, 'company')
+        if (imageName) {
+          imageUrl = await supabasePublicUrl(imageName, "company");
         } else {
-          imageUrl = '/images/company.png'
+          imageUrl = "/images/company.png";
         }
 
-      const job: JobType = {
-        id: item.id,
-        name: item.roles,
-        applicants: item.applicants,
-        category: item.CategoryJob,
-        desc: item.description,
-        jobType: item.jobType,
-        image: imageUrl,
-        location: item.Company?.Companyoverview[0]?.location,
-        needs: item.needs,
-        type: item.CategoryJob.name,
-        skills: item.requiredSkills
-      };
+        const job: JobType = {
+          id: item.id,
+          name: item.roles,
+          applicants: item.applicants,
+          category: item.CategoryJob,
+          desc: item.description,
+          jobType: item.jobType,
+          image: imageUrl,
+          location: item.Company?.Companyoverview[0]?.location,
+          needs: item.needs,
+          type: item.CategoryJob.name,
+          skills: item.requiredSkills,
+        };
 
-      return job;
-    })
-    )
+        return job;
+      })
+    );
+  }
+
+  return [];
+};
+
+export const parsingCategoriesOptions = (
+  data: any,
+  isLoading: boolean,
+  error: any
+) => {
+  if (!isLoading && !error && data) {
+    return data.map((item: any) => {
+      return {
+        id: item.id,
+        label: item.name,
+      } as optionType;
+    }) as optionType[];
   }
 
   return [];
