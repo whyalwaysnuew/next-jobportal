@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -17,6 +17,9 @@ import Link from "next/link";
 import React, {FC} from "react";
 import {useForm} from "react-hook-form";
 import {z} from "zod";
+import {signIn} from "next-auth/react";
+import {useToast} from "@/components/ui/use-toast";
+import {useRouter} from "next/navigation";
 
 interface LoginPageProps {}
 
@@ -25,8 +28,28 @@ const LoginPage: FC<LoginPageProps> = ({}) => {
     resolver: zodResolver(formLoginSchema),
   });
 
-  const onSubmit = (val: z.infer<typeof formLoginSchema>) => {
-    console.log(val);
+  const {toast} = useToast();
+
+  const router = useRouter();
+
+  const onSubmit = async (val: z.infer<typeof formLoginSchema>) => {
+    const authenticated = await signIn("credentials", {
+      ...val,
+      redirect: false,
+    });
+
+    console.log(authenticated);
+
+    if (authenticated?.error) {
+      toast({
+        title: "Error",
+        description: "Email or Password might be wrong",
+      });
+
+      return;
+    }
+
+    router.push("/");
   };
 
   return (
@@ -64,13 +87,17 @@ const LoginPage: FC<LoginPageProps> = ({}) => {
             )}
           />
 
-          <Button type="submit" className="w-full">Login</Button>
+          <Button type="submit" className="w-full">
+            Login
+          </Button>
         </form>
       </Form>
 
       <div className="text-gray-500 text-sm mt-6">
-        Don`t have an account? {" "}
-        <Link href='/register' className="text-primary font-medium" >Register</Link>
+        Don`t have an account?{" "}
+        <Link href="/register" className="text-primary font-medium">
+          Register
+        </Link>
       </div>
     </div>
   );
