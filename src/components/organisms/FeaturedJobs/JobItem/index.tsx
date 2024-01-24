@@ -10,7 +10,7 @@ const JobItem: FC<JobItemProps> = ({ categories, desc, image, jobType, location,
   return (
     <div className="border border-border p-6 cursor-pointer">
       <div className="flex flex-row justify-between items-start">
-        <Image src={image} alt={image} width={48} height={48} />
+        <Image src={image} alt={image} width={48} height={48} style={{objectFit: "cover"}}/>
         <span className="px-4 py-1 border text-xs font-semibold text-primary border-primary">
           {jobType}
         </span>
