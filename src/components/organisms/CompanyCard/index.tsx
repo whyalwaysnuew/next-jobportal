@@ -8,7 +8,7 @@ interface CompanyCardProps extends CompanyType {
   
 }
 
-const CompanyCard: FC<CompanyCardProps> = ({ categories, description, image, name, totalJobs }) => {
+const CompanyCard: FC<CompanyCardProps> = ({ industry, description, image, name, totalJobs }) => {
 
     const router = useRouter()
 
@@ -20,13 +20,12 @@ const CompanyCard: FC<CompanyCardProps> = ({ categories, description, image, nam
         </div>
         <div className="my-4">
             <div className="text-lg font-semibold mb-2">{name}</div>
-            <div className="line-clamp-3 text-sm text-muted-foregorund">
-                {description}
+            <div className="line-clamp-3 text-sm text-muted-foregorund" dangerouslySetInnerHTML={{__html: description}}>
             </div>
         </div>
         <div className="space-x-2">
             <Badge variant='outline'>
-                {categories}
+                {industry}
             </Badge>
         </div>
     </div>
