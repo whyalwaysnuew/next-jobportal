@@ -31,9 +31,6 @@ const useCompanies = (filter?: string[]) => {
     parseCompanies();
   }, [data, isLoading, error]);
 
-  console.log(companies);
-  
-
   return {
     companies,
     mutate,

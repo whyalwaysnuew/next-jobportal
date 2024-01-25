@@ -40,7 +40,6 @@ interface FormModalApplyProps {
   jobType: string | undefined;
   industry: string | undefined;
   id: string | undefined;
-  isApplied: number | undefined
 }
 
 const FormModalApply: FC<FormModalApplyProps> = ({
@@ -50,7 +49,6 @@ const FormModalApply: FC<FormModalApplyProps> = ({
   jobType,
   industry,
   id,
-  isApplied
 }) => {
   const form = useForm<z.infer<typeof formApplySchema>>({
     resolver: zodResolver(formApplySchema),

@@ -38,8 +38,6 @@ const LoginPage: FC<LoginPageProps> = ({}) => {
       redirect: false,
     });
 
-    console.log(authenticated);
-
     if (authenticated?.error) {
       toast({
         title: "Error",
