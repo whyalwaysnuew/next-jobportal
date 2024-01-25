@@ -1,9 +1,10 @@
-import { CompanySocmedType } from './../types/index';
+import {CompanySocmedType} from "./../types/index";
 import {type ClassValue, clsx} from "clsx";
 import {twMerge} from "tailwind-merge";
 import bcrypt from "bcryptjs";
 import {CompanyType, JobType, categoryJobType, optionType} from "@/types";
 import {supabasePublicUrl} from "./supabase";
+import dayjs from "dayjs";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -90,7 +91,11 @@ export const parsingJobs = async (
   return [];
 };
 
-export const parsingCompanies = async (data: any, isLoading: boolean, error: any) => {
+export const parsingCompanies = async (
+  data: any,
+  isLoading: boolean,
+  error: any
+) => {
   if (!isLoading && !error && data) {
     return await Promise.all(
       data.map(async (item: any) => {
@@ -103,7 +108,7 @@ export const parsingCompanies = async (data: any, isLoading: boolean, error: any
           imageUrl = "/images/company.png";
         }
 
-        const companyDetail = item.Companyoverview[0]
+        const companyDetail = item.Companyoverview[0];
 
         const company: CompanyType = {
           id: item.id,
@@ -118,7 +123,7 @@ export const parsingCompanies = async (data: any, isLoading: boolean, error: any
           website: companyDetail?.website,
           socmed: item.CompanySocialMedia[0],
           teams: item?.CompanyTeam,
-          totalJobs: item._count.Job
+          totalJobs: item._count.Job,
         };
 
         return company;
@@ -145,4 +150,11 @@ export const parsingCategoriesOptions = (
   }
 
   return [];
+};
+
+export const dateFormat = (
+  date: Date | string,
+  format: string = "DD MMM YYYY"
+) => {
+  return dayjs(date).format(format);
 };
