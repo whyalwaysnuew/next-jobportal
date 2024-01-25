@@ -1,12 +1,14 @@
 import {Badge} from "@/components/ui/badge";
 import {JobType, categoryJobType} from "@/types";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React, {FC} from "react";
 
 interface JobItemProps extends JobType {}
 
 const JobItem: FC<JobItemProps> = ({
   category,
+  id,
   desc,
   image,
   jobType,
@@ -15,8 +17,9 @@ const JobItem: FC<JobItemProps> = ({
   type,
   skills,
 }) => {
+  const router = useRouter()
   return (
-    <div className="border border-border p-6 cursor-pointer">
+    <div onClick={() => router.push('/detail/job/' + id)} className="border border-border p-6 cursor-pointer">
       <div className="flex flex-row justify-between items-start">
         <Image
           src={image}

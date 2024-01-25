@@ -88,7 +88,7 @@ const DetailJobPage = async ({params}: {params: {id: string}}) => {
               </div>
             </div>
           </div>
-          <FormModalApply />
+          <FormModalApply id={data.id!!} industry={data.Company?.Companyoverview[0].industry} image={data.image} roles={data.roles} jobType={data.jobType} location={data.Company?.Companyoverview[0].location}  />
         </div>
       </div>
 

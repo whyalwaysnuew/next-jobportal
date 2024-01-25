@@ -10,52 +10,122 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
-import { useForm } from "react-hook-form";
-import { formApplySchema } from "@/lib/form-schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import {useForm} from "react-hook-form";
+import {formApplySchema} from "@/lib/form-schema";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {z} from "zod";
 import Image from "next/image";
-import { Separator } from "@/components/ui/separator";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import {Separator} from "@/components/ui/separator";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
+import {Textarea} from "@/components/ui/textarea";
 import UploadField from "../UploadField";
+import {useSession} from "next-auth/react";
+import {supabaseUploadFile} from "@/lib/supabase";
+import {useToast} from "@/components/ui/use-toast";
+import {useRouter} from "next/navigation";
 
-interface FormModalApplyProps {}
+interface FormModalApplyProps {
+  image: string | undefined;
+  roles: string | undefined;
+  location: string | undefined;
+  jobType: string | undefined;
+  industry: string | undefined;
+  id: string | undefined;
+}
 
-const FormModalApply: FC<FormModalApplyProps> = ({}) => {
-    const form = useForm<z.infer<typeof formApplySchema>>({
-        resolver: zodResolver(formApplySchema)
-    })
+const FormModalApply: FC<FormModalApplyProps> = ({
+  image,
+  roles,
+  location,
+  jobType,
+  industry,
+  id,
+}) => {
+  const form = useForm<z.infer<typeof formApplySchema>>({
+    resolver: zodResolver(formApplySchema),
+  });
 
-    const onSubmit = (val: z.infer<typeof formApplySchema>) => {
-        console.log(val);
+  const {toast} = useToast();
+  const router = useRouter();
+
+  const {data: session} = useSession();
+
+  const onSubmit = async (val: z.infer<typeof formApplySchema>) => {
+    try {
+      const {filename, error} = await supabaseUploadFile(
+        val.resume,
+        "applicant"
+      );
+
+      const reqData = {
+        userId: session?.user.id,
+        jobId: id,
+        resume: filename,
+        coverLetter: val.coverLetter,
+        linkedIn: val.linkedIn,
+        phone: val.phone,
+        portfolio: val.portfolio,
+        previousJobTitle: val.previousJobTitle,
+      };
+
+      if (error) {
+        throw "Error";
+      };
+
+      await fetch("/api/jobs/apply", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(reqData),
+      });
+
+      await toast({
+        title: "Success",
+        description: "Apply job success!",
+      });
+
+      router.replace("/");
+    } catch (error) {
+      console.log(error);
+
+      toast({
+        title: "Error",
+        description: "Something went wrong! Please try again",
+      });
     }
+  };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="text-lg px-12 py-6" size="lg">
-          Apply
-        </Button>
+        {session ? (
+          <Button className="text-lg px-12 py-6" size="lg">
+            Apply
+          </Button>
+        ) : (
+          <Button disabled variant="outline">
+            Login First
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <div>
           <div className="inline-flex items-center gap-4">
             <div>
-              <Image
-                src="/images/company2.png"
-                alt="/images/company2.png"
-                width={60}
-                height={60}
-              />
+              <Image src={image!!} alt={image!!} width={60} height={60} />
             </div>
             <div>
-              <div className="text-lg font-semibold">
-                SEO Specialist
-              </div>
+              <div className="text-lg font-semibold">{roles}</div>
               <div className="text-gray-500">
-                Agency . Oslo, Norway . Full-Time
+                {industry} . {location} . {jobType}
               </div>
             </div>
           </div>
@@ -172,7 +242,10 @@ const FormModalApply: FC<FormModalApplyProps> = ({}) => {
                   <FormItem>
                     <FormLabel>Additional Information</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Add a cover letter or anything else you want to share" {...field} />
+                      <Textarea
+                        placeholder="Add a cover letter or anything else you want to share"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -182,7 +255,6 @@ const FormModalApply: FC<FormModalApplyProps> = ({}) => {
               <UploadField form={form} />
 
               <Button className="w-full">Submit Application</Button>
-
             </form>
           </Form>
         </div>
