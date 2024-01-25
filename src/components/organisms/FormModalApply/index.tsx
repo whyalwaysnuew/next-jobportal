@@ -40,6 +40,7 @@ interface FormModalApplyProps {
   jobType: string | undefined;
   industry: string | undefined;
   id: string | undefined;
+  isApplied: number | undefined
 }
 
 const FormModalApply: FC<FormModalApplyProps> = ({
@@ -49,6 +50,7 @@ const FormModalApply: FC<FormModalApplyProps> = ({
   jobType,
   industry,
   id,
+  isApplied
 }) => {
   const form = useForm<z.infer<typeof formApplySchema>>({
     resolver: zodResolver(formApplySchema),
@@ -106,15 +108,9 @@ const FormModalApply: FC<FormModalApplyProps> = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        {session ? (
-          <Button className="text-lg px-12 py-6" size="lg">
-            Apply
-          </Button>
-        ) : (
-          <Button disabled variant="outline">
-            Login First
-          </Button>
-        )}
+        <Button className="text-lg px-12 py-6" size="lg">
+          Apply
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
         <div>

@@ -8,10 +8,14 @@ import Link from "next/link";
 import React, {FC} from "react";
 import {BiCategory} from "react-icons/bi";
 import prisma from "../../../../../../lib/prisma";
-import { supabasePublicUrl } from "@/lib/supabase";
-import { dateFormat } from "@/lib/utils";
+import {supabasePublicUrl} from "@/lib/supabase";
+import {dateFormat} from "@/lib/utils";
+import {getServerSession} from "next-auth";
+import {authOptions} from "@/app/api/auth/[...nextauth]/route";
 
 async function getDetailJob(id: string) {
+  const session = await getServerSession(authOptions);
+
   const data = await prisma.job.findFirst({
     where: {
       id,
@@ -26,22 +30,50 @@ async function getDetailJob(id: string) {
     },
   });
 
-  let imageUrl
+  let imageUrl;
 
-  if(data?.Company?.Companyoverview[0].image) {
-    imageUrl = await supabasePublicUrl(data.Company.Companyoverview[0].image, 'company')
+  if (data?.Company?.Companyoverview[0].image) {
+    imageUrl = await supabasePublicUrl(
+      data.Company.Companyoverview[0].image,
+      "company"
+    );
   } else {
-    imageUrl = '/images/company2.png'
+    imageUrl = "/images/company2.png";
   }
 
-  const applicants = data?.applicants || 0
-  const needs = data?.needs || 0
+  const applicants = data?.applicants || 0;
+  const needs = data?.needs || 0;
 
-  return {...data, image: imageUrl, benefits: data?.benefits, applicants, needs};
+  const isApplied = await prisma.applicant.count({
+    where: {
+      userId: session?.user.id,
+    },
+  });
+
+  if (!session) {
+    return {
+      ...data,
+      image: imageUrl,
+      benefits: data?.benefits,
+      applicants,
+      needs,
+      isApplied: 0,
+    };
+  }
+
+  return {
+    ...data,
+    image: imageUrl,
+    benefits: data?.benefits,
+    applicants,
+    needs,
+    isApplied,
+  };
 }
 
 const DetailJobPage = async ({params}: {params: {id: string}}) => {
   const data = await getDetailJob(params.id);
+  const session = await getServerSession(authOptions);
 
   return (
     <>
@@ -75,20 +107,38 @@ const DetailJobPage = async ({params}: {params: {id: string}}) => {
 
         <div className="bg-white shadow mt-10 p-5 w-11/12 mx-auto flex flex-row justify-between items-center">
           <div className="inline-flex items-center gap-5">
-            <Image
-              src={data.image}
-              alt={data.image}
-              width={88}
-              height={88}
-            />
+            <Image src={data.image} alt={data.image} width={88} height={88} />
             <div>
               <div className="text-2xl font-semibold">{data?.roles}</div>
               <div className="text-muted-foreground">
-                {data?.Company?.Companyoverview[0].industry} . {data?.Company?.Companyoverview[0].location} . {data?.jobType}
+                {data?.Company?.Companyoverview[0].industry} .{" "}
+                {data?.Company?.Companyoverview[0].location} . {data?.jobType}
               </div>
             </div>
           </div>
-          <FormModalApply id={data.id!!} industry={data.Company?.Companyoverview[0].industry} image={data.image} roles={data.roles} jobType={data.jobType} location={data.Company?.Companyoverview[0].location}  />
+          {session ? (
+            <>
+              {data.isApplied === 1 ? (
+                <Button disabled className="text-lg px-12 py-6 bg-green-500">
+                  Applied
+                </Button>
+              ) : (
+                <FormModalApply
+                  id={data.id!!}
+                  industry={data.Company?.Companyoverview[0].industry}
+                  image={data.image}
+                  roles={data.roles}
+                  jobType={data.jobType}
+                  location={data.Company?.Companyoverview[0].location}
+                  isApplied={data.isApplied}
+                />
+              )}
+            </>
+          ) : (
+            <Button disabled variant="outline">
+              Login First
+            </Button>
+          )}
         </div>
       </div>
 
@@ -96,18 +146,24 @@ const DetailJobPage = async ({params}: {params: {id: string}}) => {
         <div className="w-3/4">
           <div className="mb-16">
             <div className="text-3xl font-semibold mb-3">Description</div>
-            <div className="text-muted-foreground" dangerouslySetInnerHTML={{__html: data?.description!!}}>
-            </div>
+            <div
+              className="text-muted-foreground"
+              dangerouslySetInnerHTML={{__html: data?.description!!}}
+            ></div>
           </div>
           <div className="mb-16">
             <div className="text-3xl font-semibold mb-3">Responsibilities</div>
-            <div className="text-muted-foreground" dangerouslySetInnerHTML={{__html: data?.whoYouAre!!}}>
-            </div>
+            <div
+              className="text-muted-foreground"
+              dangerouslySetInnerHTML={{__html: data?.whoYouAre!!}}
+            ></div>
           </div>
           <div className="mb-16">
             <div className="text-3xl font-semibold mb-3">Who You Are</div>
-            <div className="text-muted-foreground" dangerouslySetInnerHTML={{__html: data?.niceToHaves!!}}>
-            </div>
+            <div
+              className="text-muted-foreground"
+              dangerouslySetInnerHTML={{__html: data?.niceToHaves!!}}
+            ></div>
           </div>
           <div className="mb-16">
             <div className="text-3xl font-semibold mb-3">Nice-To-Haves</div>
@@ -127,7 +183,9 @@ const DetailJobPage = async ({params}: {params: {id: string}}) => {
 
             <div className="mt-6 p-4 bg-slate-50">
               <div className="mb-2">
-                <span className="font-semibold">{data?.applicants} Applied</span>{" "}
+                <span className="font-semibold">
+                  {data?.applicants} Applied
+                </span>{" "}
                 <span className="text-gray-600">of {data?.needs} capacity</span>
               </div>
               <Progress value={(data.applicants / data.needs) * 100} />
@@ -136,11 +194,15 @@ const DetailJobPage = async ({params}: {params: {id: string}}) => {
             <div className="mt-6 space-y-4">
               <div className="flex flex-row justify-between">
                 <div className="text-gray-500">Apply Before</div>
-                <div className="font-semibold">{dateFormat(data.dueDate!!)}</div>
+                <div className="font-semibold">
+                  {dateFormat(data.dueDate!!)}
+                </div>
               </div>
               <div className="flex flex-row justify-between">
                 <div className="text-gray-500">Job Posted On</div>
-                <div className="font-semibold">{dateFormat(data.datePosted!!)}</div>
+                <div className="font-semibold">
+                  {dateFormat(data.datePosted!!)}
+                </div>
               </div>
               <div className="flex flex-row justify-between">
                 <div className="text-gray-500">Job Type</div>
@@ -148,7 +210,9 @@ const DetailJobPage = async ({params}: {params: {id: string}}) => {
               </div>
               <div className="flex flex-row justify-between">
                 <div className="text-gray-500">Salary</div>
-                <div className="font-semibold">${data?.salaryFrom} - ${data?.SalaryTo} USD</div>
+                <div className="font-semibold">
+                  ${data?.salaryFrom} - ${data?.SalaryTo} USD
+                </div>
               </div>
             </div>
           </div>
